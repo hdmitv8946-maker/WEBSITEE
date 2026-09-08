@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CHARAN FF ESPORTS</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#080808;color:#fff}
+header{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;background:#111;border-bottom:1px solid #333;position:sticky;top:0;z-index:5}
+.logo{font-size:18px;font-weight:900;color:#ffb000}
+nav a{color:#fff;text-decoration:none;margin-left:10px;font-size:12px}
+.hero{min-height:62vh;padding:50px 22px;display:flex;align-items:center;background:linear-gradient(90deg,#080808ee,#08080866),url('player.jpg') center/cover}
+.hero div{max-width:650px}.tag{color:#ffb000;font-weight:bold;letter-spacing:2px;font-size:12px}
+h1{font-size:clamp(40px,11vw,78px);line-height:.95;margin:14px 0}h1 span{color:#ffb000}
+.hero p{color:#ddd;line-height:1.6;max-width:520px}
+.btn{display:inline-block;margin-top:20px;padding:13px 19px;background:#ffb000;color:#111;text-decoration:none;font-weight:800;border:0;border-radius:7px;cursor:pointer}
+section{padding:42px 18px;max-width:1050px;margin:auto}.title{font-size:28px;margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:15px}
+.card{background:#151515;border:1px solid #292929;border-radius:12px;padding:20px}.card h3{margin-bottom:9px;color:#ffb000}
+.card p{color:#bbb;line-height:1.5}
+form{display:grid;gap:12px;margin-top:15px}input,select{width:100%;padding:13px;border-radius:7px;border:1px solid #444;background:#0d0d0d;color:#fff}
+.status{margin-top:15px;padding:12px;border-radius:7px;background:#202020;color:#ddd;display:none}
+.owner{background:#101010;border:1px solid #333;border-radius:12px;padding:20px;margin-top:18px}
+.reg{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid #333;background:#171717;border-radius:9px;padding:14px;margin:10px 0;flex-wrap:wrap}
+.reg small{color:#aaa}.actions button{border:0;border-radius:6px;padding:9px 12px;margin:3px;cursor:pointer;font-weight:bold}
+.accept{background:#36d278}.reject{background:#ff4d4d;color:#fff}.delete{background:#444;color:#fff}
+.badge{padding:5px 8px;border-radius:20px;font-size:11px;font-weight:bold}.pending{background:#514000;color:#ffd34d}.accepted{background:#063d20;color:#58e69a}.rejected{background:#4a1111;color:#ff7777}
+footer{text-align:center;padding:28px;color:#888;border-top:1px solid #222}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">CHARAN FF ESPORTS</div>
+<nav><a href="#tournaments">Tournaments</a><a href="#register">Register</a><a href="#owner">Owner</a></nav>
+</header>
+
+<section class="hero">
+<div><div class="tag">FREE FIRE • ESPORTS</div>
+<h1>PLAY.<br><span>COMPETE.</span><br>WIN.</h1>
+<p>Join tournaments, submit your team registration and check your approval status.</p>
+<a class="btn" href="#register">JOIN TOURNAMENT</a></div>
+</section>
+
+<section id="tournaments">
+<h2 class="title">🏆 Upcoming Tournaments</h2>
+<div class="cards">
+<div class="card"><h3>FF Clash Cup</h3><p>Squad • Entry ₹50<br>Prize Pool ₹5,000</p></div>
+<div class="card"><h3>Booyah Battle</h3><p>Squad • Entry ₹100<br>Prize Pool ₹10,000</p></div>
+<div class="card"><h3>Weekend Rush</h3><p>Solo • Entry ₹30<br>Prize Pool ₹2,000</p></div>
+</div>
+</section>
+
+<section id="register">
+<h2 class="title">📝 Team Registration</h2>
+<div class="card">
+<form id="registrationForm">
+<input id="team" placeholder="Team name" required>
+<input id="captain" placeholder="Captain name" required>
+<input id="uid" placeholder="Free Fire UID" required>
+<input id="phone" placeholder="WhatsApp / Phone" required>
+<select id="tournament"><option>FF Clash Cup</option><option>Booyah Battle</option><option>Weekend Rush</option></select>
+<button class="btn" type="submit">SUBMIT REGISTRATION</button>
+</form>
+<div id="formStatus" class="status"></div>
+</div>
+</section>
+
+
+<section id="owner-login">
+<h2 class="title">🔐 Owner Login</h2>
+<div class="card">
+<form id="loginForm">
+<input id="ownerUser" placeholder="Owner username" value="owner" required>
+<input id="ownerPass" type="password" placeholder="Owner password" required>
+<button class="btn" type="submit">LOGIN</button>
+</form>
+<div id="loginStatus" class="status"></div>
+</div>
+</section>
+
+<section id="owner" class="hidden">
+<h2 class="title">👑 Owner Registration Panel</h2>
+<div class="owner">
+<p style="color:#aaa">Owner can accept or reject submitted teams. When you accept, the site sends the approval SMS through MSG91. Registrations are stored on this device for this demo website.</p><button class="btn" onclick="logout()">LOGOUT</button>
+<div id="registrations"></div>
+</div>
+</section>
+
+<footer>© 2026 CHARAN FF ESPORTS • Community Tournament Website</footer>
+
+<script>
+const KEY="charan_ff_registrations";
+function getRegs(){return JSON.parse(localStorage.getItem(KEY)||"[]")}
+function saveRegs(r){localStorage.setItem(KEY,JSON.stringify(r));render()}
+
+const OWNER_USERNAME="owner";
+const OWNER_PASSWORD="CHARAN@2026";
+function isLoggedIn(){return sessionStorage.getItem("owner_logged_in")==="1"}
+function updateOwnerView(){
+ document.getElementById("owner").classList.toggle("hidden",!isLoggedIn());
+}
+document.getElementById("loginForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ const u=document.getElementById("ownerUser").value;
+ const p=document.getElementById("ownerPass").value;
+ const s=document.getElementById("loginStatus");
+ s.style.display="block";
+ if(u===OWNER_USERNAME && p===OWNER_PASSWORD){
+   sessionStorage.setItem("owner_logged_in","1");
+   s.textContent="✅ Login successful!";
+   updateOwnerView();
+   document.getElementById("owner").scrollIntoView({behavior:"smooth"});
+ }else{
+   s.textContent="❌ Incorrect username or password.";
+ }
+});
+function logout(){
+ sessionStorage.removeItem("owner_logged_in");
+ updateOwnerView();
+ document.getElementById("owner-login").scrollIntoView({behavior:"smooth"});
+}
+function render(){
+ const box=document.getElementById("registrations"), regs=getRegs();
+ if(!regs.length){box.innerHTML='<p style="color:#888;margin-top:18px">No registrations yet.</p>';return}
+ box.innerHTML=regs.map((r,i)=>`
+ <div class="reg">
+   <div><b>${esc(r.team)}</b><br><small>Captain: ${esc(r.captain)} • UID: ${esc(r.uid)} • ${esc(r.phone)}<br>${esc(r.tournament)}</small></div>
+   <div><span class="badge ${r.status}">${r.status.toUpperCase()}</span><div class="actions">
+   ${r.status==="pending"?`<button class="accept" onclick="changeStatus(${i,'accepted'})">ACCEPT</button><button class="reject" onclick="changeStatus(${i,'rejected'})">REJECT</button>`:""}
+   <button class="delete" onclick="removeReg(${i})">DELETE</button></div></div>
+ </div>`).join("")
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+async function changeStatus(i,status){
+  let r=getRegs();
+  if(status==="accepted"){
+    const reg=r[i];
+    try{
+      const response=await fetch("/api/send-acceptance",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({phone:reg.phone,tournament:reg.tournament})
+      });
+      const data=await response.json();
+      if(!response.ok) throw new Error(data.error||"SMS could not be sent");
+      r[i].status="accepted";
+      saveRegs(r);
+      alert("Registration accepted and SMS sent.");
+    }catch(err){
+      alert("Registration was NOT accepted. SMS failed: "+err.message);
+    }
+  }else{
+    r[i].status=status;
+    saveRegs(r);
+  }
+}
+function removeReg(i){let r=getRegs();r.splice(i,1);saveRegs(r)}
+document.getElementById("registrationForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ let r=getRegs();
+ r.push({team:team.value,captain:captain.value,uid:uid.value,phone:phone.value,tournament:tournament.value,status:"pending"});
+ saveRegs(r);e.target.reset();
+ const s=document.getElementById("formStatus");s.style.display="block";s.textContent="✅ Registration submitted! Owner will accept or reject it.";
+});
+updateOwnerView();
+render();
+</script>
+</body>
+</html>
